@@ -1,1 +1,3 @@
 *~
+bin/*.o
+deterministic_lsh_main

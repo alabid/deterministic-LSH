@@ -1,6 +1,11 @@
 # deterministic-LSH
 Deterministic Locality Sensitive Hashing
 
+Use
+---
+To compile, run `make`. Then run main binary produced in current directory. `*.o` files and other secondary
+binary files are stored in `bin/`.
+
 Rough Plan
 ----------
 ### Stage 0

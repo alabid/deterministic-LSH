@@ -1,8 +1,22 @@
 # deterministic-LSH
 Deterministic Locality Sensitive Hashing
 
+**Not ready for use at all**
+
+Dependencies
+------------
+You need to install the following
+(possibly through macports or brew if you are on a mac):
+* `FLANN`
+* `LZ4` 
+
 Use
 ---
+You need to modify the following variables in the `Makefile`:
+* `FLANN_INCLUDES`: Points to `flann` header files
+* `FLANN_LINKS`: Points to `flann` static or dynamic libraries
+* `LZ4_LIB`: Points to `lz4` library files
+
 To compile, run `make`. Then run main binary produced in current directory. `*.o` files and other secondary
 binary files are stored in `bin/`.
 

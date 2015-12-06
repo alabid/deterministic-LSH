@@ -1,4 +1,4 @@
 *~
 bin/*.o
-deterministic_lsh_main
+*_lsh_main
 data/files/*

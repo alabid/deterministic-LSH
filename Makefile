@@ -1,4 +1,6 @@
-CXX_OBJS = bin/main.o
+CXX_OBJS_LIN = bin/linear_lsh.o
+CXX_OBJS_FLANN = bin/flann.o
+CXX_OBJS = bin/*.o
 
 # modify to point to where where 'flann' header files and libraries are
 FLANN_INCLUDES = -I/opt/local/include
@@ -16,12 +18,16 @@ ifeq ($(shell which clang++),)
 	CXX = g++
 endif
 
-MAIN := deterministic_lsh_main
+FLANN_LSH := flann_lsh_main
+LINEAR_LSH := linear_lsh_main
 
-all : $(MAIN)
+all : $(FLANN_LSH) $(LINEAR_LSH)
 
-$(MAIN) : $(CXX_OBJS)
-	$(CXX) -o $@ $(CXX_OBJS) $(LDFLAGS)
+$(FLANN_LSH) : $(CXX_OBJS_FLANN)
+	$(CXX) -o $@ $(CXX_OBJS_FLANN) $(LDFLAGS)
+
+$(LINEAR_LSH) : $(CXX_OBJS_LIN)
+	$(CXX) -o $@ $(CXX_OBJS_LIN)
 
 bin/%.o : src/%.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $<

@@ -1,7 +1,5 @@
 /**
- * Main entry file.
- * Performs rudimentary parsing of command line arguments and
- * calls appropriate functions based on arguments.
+ * Flann LSH
  */
 
 #include <flann/flann.hpp>
@@ -17,8 +15,8 @@ int main(int argc, char** argv)
 
     Matrix<float> dataset;
     Matrix<float> query;
-    load_from_file(dataset, "data/dataset.hdf5","dataset");
-    load_from_file(query, "data/dataset.hdf5","query");
+    load_from_file(dataset, "data/files/dataset.hdf5","dataset");
+    load_from_file(query, "data/files/dataset.hdf5","query");
 
     Matrix<int> indices(new int[query.rows*nn], query.rows, nn);
     Matrix<float> dists(new float[query.rows*nn], query.rows, nn);
@@ -36,7 +34,7 @@ int main(int argc, char** argv)
     // checks : specifies the maximum leafs to visit when searching for neigbors
     index.knnSearch(query, indices, dists, nn, flann::SearchParams(128));
 
-    flann::save_to_file(indices,"data/result.hdf5","result");
+    flann::save_to_file(indices,"data/files/result.hdf5","result");
 
     delete[] dataset.ptr();
     delete[] query.ptr();

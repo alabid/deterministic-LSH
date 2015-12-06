@@ -1,4 +1,4 @@
-CXX_OBJS_LIN = bin/linear_lsh.o
+CXX_OBJS_LIN = bin/linear_scan.o
 CXX_OBJS_FLANN = bin/flann.o
 CXX_OBJS = bin/*.o
 
@@ -19,14 +19,14 @@ ifeq ($(shell which clang++),)
 endif
 
 FLANN_LSH := flann_lsh_main
-LINEAR_LSH := linear_lsh_main
+LINEAR_SCAN := linear_scan_main
 
-all : $(FLANN_LSH) $(LINEAR_LSH)
+all : $(FLANN_LSH) $(LINEAR_SCAN)
 
 $(FLANN_LSH) : $(CXX_OBJS_FLANN)
 	$(CXX) -o $@ $(CXX_OBJS_FLANN) $(LDFLAGS)
 
-$(LINEAR_LSH) : $(CXX_OBJS_LIN)
+$(LINEAR_SCAN) : $(CXX_OBJS_LIN)
 	$(CXX) -o $@ $(CXX_OBJS_LIN)
 
 bin/%.o : src/%.cpp

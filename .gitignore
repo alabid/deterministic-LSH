@@ -1,4 +1,4 @@
 *~
 bin/*.o
-*_lsh_main
+*_main
 data/files/*

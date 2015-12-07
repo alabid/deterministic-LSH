@@ -16,9 +16,9 @@ using HamT = long long; // binary features in hamming space
 
 HamT toHamT(const string& line) {
   HamT num = 0;
-  int d = line.length()/2;
+  int d = line.length();
   for (int i = 0; i < d; i++) {
-    if (line[2*i]-'0' == 1) {
+    if (line[i]-'0' == 1) {
       num += pow(2, d-i-1);
     }
   }
@@ -36,7 +36,6 @@ const string conv_to_string(const HamT h, const int d) {
     s = ch + s;
 
     num /= 2;
-    if (i < d-1) s = ' ' + s;
   }
 
   return s;

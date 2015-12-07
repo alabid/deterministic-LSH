@@ -26,7 +26,7 @@ def generate_data_sets(d, nd, df, nq, qf):
     random.shuffle(numbers)
     points = [to_binary(num, d) for num in numbers[:(nd + nq)]]
 
-    point_reducer = lambda x, y: str(x) + " " + str(y)
+    point_reducer = lambda x, y: str(x) + "" + str(y)
     with open(df, "wb") as f:
         for i in range(nd):
             f.write(reduce(point_reducer, points[i]) + "\r\n")

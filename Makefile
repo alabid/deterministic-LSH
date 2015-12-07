@@ -1,3 +1,4 @@
+CXX_OBJS_RANDOM_LSH = bin/randomized_lsh.o
 CXX_OBJS_LIN = bin/linear_scan.o
 CXX_OBJS_FLANN = bin/flann.o
 CXX_OBJS = bin/*.o
@@ -11,7 +12,7 @@ LZ4_LIB = -L/usr/local/Cellar/lz4/r131/lib
 
 CXX = clang++
 OFLAGS = -O3
-CXXFLAGS = -c -g -Wall -std=c++0x $(OFLAGS) $(FLANN_INCLUDES)
+CXXFLAGS = -c -g -Wall -std=c++11 $(OFLAGS) $(FLANN_INCLUDES)
 LDFLAGS = -g -Wall $(OFLAGS) $(FLANN_LINKS) $(LZ4_LIB) -lflann -lhdf5 -llz4
 
 ifeq ($(shell which clang++),)
@@ -20,14 +21,18 @@ endif
 
 FLANN_LSH := flann_lsh_main
 LINEAR_SCAN := linear_scan_main
+RANDOMIZED_LSH := randomized_lsh_main
 
-all : $(FLANN_LSH) $(LINEAR_SCAN)
+all : $(FLANN_LSH) $(LINEAR_SCAN) $(RANDOMIZED_LSH)
 
 $(FLANN_LSH) : $(CXX_OBJS_FLANN)
 	$(CXX) -o $@ $(CXX_OBJS_FLANN) $(LDFLAGS)
 
 $(LINEAR_SCAN) : $(CXX_OBJS_LIN)
 	$(CXX) -o $@ $(CXX_OBJS_LIN)
+
+$(RANDOMIZED_LSH) : $(CXX_OBJS_RANDOM_LSH)
+	$(CXX) -o $@ $(CXX_OBJS_RANDOM_LSH)
 
 bin/%.o : src/%.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $<

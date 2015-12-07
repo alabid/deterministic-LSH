@@ -21,20 +21,18 @@ void load_from_file(Matrix<float>& dataset, const string& filename) {
 
   string line;
   int pointNum = 0;
-  cerr << "before reading first line" << endl;
+
   while (getline(dfile, line)) {
-    cerr << line << endl;
     stringstream ss(line);
     int i = 0;
     int j = 0;
     char c;
     while(ss >> c) {
-      cerr << "c: " << c;
       dataset[i][j++] = c-'0';
       i++;
     }
   }
-  cout << "came to the end" << endl;
+
   dfile.close();
 }
 

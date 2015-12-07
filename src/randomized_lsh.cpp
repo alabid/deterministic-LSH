@@ -64,7 +64,7 @@ void buildNearNeighborStruct(const int param_c,
         }
 }
 
-// return all indices of near neighbors within distance cr
+// return all indices of near neighbors within distance r
 vector<int> getNearNeighbors(const Point& point,
                              const int distance_threshold,
                              const vector<Point>& data) {
@@ -80,7 +80,7 @@ vector<int> getNearNeighbors(const Point& point,
                 candidates.insert(hash_table[i][bucket].begin(), hash_table[i][bucket].end());
         }
 
-        // validate if near neighbors are within distance_threshold
+        // validate if near neighbors are within r
         vector<int> result;
         for (const auto& j : candidates) {
                 int distance {0};
@@ -126,7 +126,7 @@ vector<Point> readPointsFromFile(const string& file) {
         return points;
 }
 
-// perform c-approximate r-near neighbor search
+// perform r-near neighbor search
 int main(int argc, char* argv[]) {
         assert(argc == 4);
 
@@ -157,7 +157,7 @@ int main(int argc, char* argv[]) {
 
         // query and output results
         auto query_start = high_resolution_clock::now();
-        const int distance = param_c * param_r;
+        const int distance = param_r;
         for (int i {0}, sz {static_cast<int>(query.size())}; i < sz; ++i) {
                 vector<int> result {getNearNeighbors(query[i], distance,
                                                      data)};  // result is a vector of index for points in data

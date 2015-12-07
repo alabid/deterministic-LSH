@@ -1,0 +1,2 @@
+-e git+git://github.com/Captricity/pyflann.git#egg=pyflann
+numpy

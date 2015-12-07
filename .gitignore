@@ -2,3 +2,4 @@
 bin/*.o
 *_main
 data/files/*
+src/pyflann

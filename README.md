@@ -8,7 +8,7 @@ Dependencies
 You need to install the following
 (possibly through macports or brew if you are on a mac):
 * `FLANN`
-* `LZ4` 
+* `LZ4`
 
 Use
 ---
@@ -37,3 +37,14 @@ Rough Plan
 
 ### Stage 3: Final Report
 Final project due Dec 10
+
+Todo List
+----------
+1. vector<bool> for linear scan
+2. deterministic LSH
+3. success prob for randomized LSH
+4. measure time for all algorithms
+5. measure recall
+6. experiment for success probability
+7. presentation slides
+8. report

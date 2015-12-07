@@ -12,41 +12,31 @@
 
 using namespace std;
 
-using HamT = long long; // binary features in hamming space
+using HamT = vector<bool>; // binary features in hamming space
 
 HamT toHamT(const string& line) {
-  HamT num = 0;
-  int d = line.length();
-  for (int i = 0; i < d; i++) {
-    if (line[i]-'0' == 1) {
-      num += pow(2, d-i-1);
-    }
+  HamT ham;
+  for (unsigned i = 0; i < line.length(); i++) {
+    ham.push_back(line[i]-'0' == 1);
   }
-  return num;
+  return ham;
 }
 
-const string conv_to_string(const HamT h, const int d) {
+const string conv_to_string(const HamT& h) {
   string s("");
-  HamT num = h;
 
-  for (int i = 0; i < d; i++) {
-    char ch;
-    if (num % 2 == 0) ch = '0';
-    else ch = '1';
-    s = ch + s;
-
-    num /= 2;
+  for (const bool bit : h) {
+    if (bit) s = s + '1';
+    else s = s + '0';
   }
 
   return s;
 }
 
-int hamTDistance(const HamT h1, const HamT h2) {
-  int dist = 0;
-  long long distNum = h1 ^ h2;
-  while (distNum != 0) {
-    distNum &= distNum-1;
-    dist++;
+unsigned hamTDistance(const HamT& h1, const HamT& h2) {
+  unsigned dist = 0;
+  for (unsigned i = 0; i < h1.size(); i++) {
+    dist += static_cast<unsigned>(h1[i] != h2[i]);
   }
   return dist;
 }
@@ -58,7 +48,6 @@ int main(int argc, char** argv) {
   }
 
   int R = stoi(argv[1]);
-  int d = 0;
 
   string line;
   ifstream dataset(argv[2]);
@@ -69,11 +58,6 @@ int main(int argc, char** argv) {
   vector<HamT> datapoints;
   while (getline(dataset, line)) {
     datapoints.push_back(toHamT(line));
-    if (d == 0) {
-      for (auto ch : line) {
-        if (ch == '0' || ch == '1') d++;
-      }
-    }
   }
   dataset.close();
 
@@ -88,17 +72,17 @@ int main(int argc, char** argv) {
   }
   queryset.close();
 
-  for (auto qpoint : querypoints) {
+  for (auto &qpoint : querypoints) {
     int count = 0;
     cout << "NNs (R=" << R << ") for "
-         << conv_to_string(qpoint, d) << " :" << endl;
-    for (auto dpoint : datapoints) {
+         << conv_to_string(qpoint) << " :" << endl;
+    for (auto &dpoint : datapoints) {
       if (hamTDistance(qpoint, dpoint) <= R) {
-        cout << conv_to_string(dpoint, d) << endl;
+        cout << conv_to_string(dpoint) << endl;
         count++;
       }
     }
-    cout << "Total NNs for " << conv_to_string(qpoint, d)
+    cout << "Total NNs for " << conv_to_string(qpoint)
          << " : " << count << endl;
     // cout << "Total time for R-NN query: " << endl;
   }

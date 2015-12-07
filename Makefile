@@ -40,4 +40,4 @@ bin/%.o : src/%.cpp
 .PHONY : clean
 
 clean:
-	rm -rf $(CXX_OBJS) $(ALL)
+	rm -rf $(CXX_OBJS) *_main

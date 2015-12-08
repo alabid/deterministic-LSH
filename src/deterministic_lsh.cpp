@@ -132,8 +132,8 @@ vector<Point> readPointsFromFile(const string& file) {
 // perform r-near neighbor search
 void NearNeighborSearch(const string& data_file,
                         const string& query_file,
-                        const int param_r) {                            // r-near
-        const int param_c {2};                                          // c-approximate
+                        const int param_r,                              // r-near
+                        const int param_c) {                            // c-approximate
         const vector<Point> data {readPointsFromFile(data_file)};       // data points
         const vector<Point> query {readPointsFromFile(query_file)};     // query points
         const int param_n {static_cast<int>(data.size())};              // number of data points
@@ -175,9 +175,10 @@ void NearNeighborSearch(const string& data_file,
 }
 
 int main(int argc, char* argv[]) {
-        if (argc != 4) {
-                cerr << "Usage: " << argv[0] << " R DataFile QueryFile [SuccessProb]\n"
+        if (argc != 5) {
+                cerr << "Usage: " << argv[0] << " R C DataFile QueryFile [SuccessProb]\n"
                      << "       R               retrieve all points within hamming distance R\n"
+                     << "       C               approximation factor\n"
                      << "       DataFile        file containing all data points of the same dimension\n"
                      << "                       each point represented as a binary string in a line\n"
                      << "       QueryFile       file containing all query points\n";
@@ -185,10 +186,11 @@ int main(int argc, char* argv[]) {
         }
 
         const int param_r {stoi(argv[1])};
-        const string data_file {argv[2]};
-        const string query_file {argv[3]};
+        const int param_c {stoi(argv[2])};
+        const string data_file {argv[3]};
+        const string query_file {argv[4]};
 
-        NearNeighborSearch(data_file, query_file, param_r);
+        NearNeighborSearch(data_file, query_file, param_r, param_c);
 
         return EXIT_SUCCESS;
 }

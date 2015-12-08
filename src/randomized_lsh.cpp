@@ -5,7 +5,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
+#include <functional>
 #include <iostream>
+#include <random>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -24,27 +26,30 @@ void buildNearNeighborStruct(const int param_c,
                              const int param_r,
                              const int param_d,
                              const int param_n,
+                             const double param_delta,
                              const vector<Point>& data) {
         // compute LSH parameters: randomly select k bits; use L hash tables
-        // P2 = 1-cr/d, and P2^k = 1/n
-        int param_k = static_cast<int>(ceil(log(1.0/param_n) / log(1-static_cast<double>(param_c)*param_r/param_d)));
-        assert(param_k < 64);           // guarantee that bucket is within int64_t, or perhaps 32-bit is enough for now?
-                                        // for n=1M, r=d/4 and c=2, k is 20
-                                        // TODO make it more flexible for larger #buckets
-        // L = n^\pho = n^(1/c)
-        int param_L = static_cast<int>(ceil(pow(param_n, 1.0/param_c)));
-        //cerr << "k = " << param_k << endl;
-        //cerr << "L = " << param_L << endl;
+        // P2^k = 1/n, where P2 = 1-cr/d
+        // k = -log(n) / log(P2)
+        // TODO set k to minimize expected query running time?
+        int param_k = static_cast<int>(ceil(-log(param_n) / log(1-static_cast<double>(param_c)*param_r/param_d)));
+        assert(param_k > 0 && param_k < 64);    // guarantee that bucket is within int64_t, or perhaps 32-bit is enough for now?
+                                                // for n=1M, r=d/4 and c=2, k is 20
+                                                // TODO make it more flexible for larger #buckets
+        // 1 - (1-P1^k)^L >= 1 - delta, where P1 = 1-r/d
+        // L >= log(delta) / log(1 - P1^k)
+        // if no delta, a reasonable setting is L = n^\pho = n^(1/c)
+        int param_L = static_cast<int>(ceil(log(param_delta) / log(1 - pow(1-static_cast<double>(param_r)/param_d, param_k))));
+        assert(param_L > 0);
+        cerr << "k = " << param_k << endl
+             << "L = " << param_L << endl;
 
         // initialize hamming projection family
         projection.resize(param_L);
-        vector<int> dimension;
-        for (int i {1}; i <= param_d; ++i)
-                dimension.push_back(i);
+        auto dice = bind(uniform_int_distribution<int>(0, param_d - 1), default_random_engine());
         for (int i {0}; i < param_L; ++i) {
-                random_shuffle(dimension.begin(), dimension.end());     // TODO use faster knuth shuffle?
                 for (int j {0}; j < param_k; ++j) {
-                        projection[i].push_back(dimension[j]);
+                        projection[i].push_back(dice());
                 }
         }
 
@@ -53,7 +58,7 @@ void buildNearNeighborStruct(const int param_c,
         for (int i {0}; i < param_n; ++i) {
                 for (int j {0}; j < param_L; ++j) {
                         int64_t bucket {0};
-                        for (int k {0}; k < param_k; ++k) {
+                        for (int k {0}; k < param_k; ++k) {     // AND concatenation of k primitive functions
                                 bucket = bucket * 2 + data[i][projection[j][k]];
                         }
                         if (hash_table[j].find(bucket) == hash_table[j].end()) {
@@ -64,9 +69,9 @@ void buildNearNeighborStruct(const int param_c,
         }
 }
 
-// return all indices of near neighbors within distance r
+// return all indices of near neighbors within distance threshold r
 vector<int> getNearNeighbors(const Point& point,
-                             const int distance_threshold,
+                             const int threshold,
                              const vector<Point>& data) {
         unordered_set<int> candidates;
         for (int i {0}, L {static_cast<int>(projection.size())}; i < L; ++i) {
@@ -84,9 +89,9 @@ vector<int> getNearNeighbors(const Point& point,
         vector<int> result;
         for (const auto& j : candidates) {
                 int distance {0};
-                for (int i {0}, d {static_cast<int>(point.size())}; i < d; ++i)
+                for (int i {0}; i < point.size(); ++i)
                         distance += (point[i] != data[j][i]);
-                if (distance <= distance_threshold)
+                if (distance <= threshold)
                         result.push_back(j);
         }
         return result;
@@ -127,29 +132,31 @@ vector<Point> readPointsFromFile(const string& file) {
 }
 
 // perform r-near neighbor search
-int main(int argc, char* argv[]) {
-        assert(argc == 4);
-
+void NearNeighborSearch(const string& data_file,
+                        const string& query_file,
+                        const int param_r,                              // r-near
+                        const double param_delta) {                     // failure probability
         const int param_c {2};                                          // c-approximate
-        const int param_r {stoi(argv[1])};                              // r-near
-        const vector<Point> data {readPointsFromFile(argv[2])};         // data points
-        const vector<Point> query {readPointsFromFile(argv[3])};        // query points
+        const vector<Point> data {readPointsFromFile(data_file)};       // data points
+        const vector<Point> query {readPointsFromFile(query_file)};     // query points
         const int param_n {static_cast<int>(data.size())};              // number of data points
         assert(param_n > 0);
         const int param_d {static_cast<int>(data.at(0).size())};        // dimension of points
+        assert(param_r > 0);
+        assert(param_delta > 0 && param_delta < 1);
 
         // echo input parameters
-        // TODO add parameter \theta for success probability in randomized LSH
-        cerr << "c = " << param_c << endl;
-        cerr << "r = " << param_r << endl;
-        cerr << "d = " << param_d << endl;
-        cerr << "n = " << param_n << endl;
-        cerr << "#query = " << query.size() << endl;
+        cerr << "r = " << param_r << endl
+             << "c = " << param_c << endl
+             << "d = " << param_d << endl
+             << "n = " << param_n << endl
+             << "delta = " << param_delta << endl
+             << "#query = " << query.size() << endl;
 
         // build LSH construction and add data points
         using namespace std::chrono;
         auto build_start = high_resolution_clock::now();
-        buildNearNeighborStruct(param_c, param_r, param_d, param_n,
+        buildNearNeighborStruct(param_c, param_r, param_d, param_n, param_delta,
                                 data);
         auto build_end = high_resolution_clock::now();
         auto build_duration = duration_cast<milliseconds>(build_end - build_start);
@@ -157,9 +164,8 @@ int main(int argc, char* argv[]) {
 
         // query and output results
         auto query_start = high_resolution_clock::now();
-        const int distance = param_r;
-        for (int i {0}, sz {static_cast<int>(query.size())}; i < sz; ++i) {
-                vector<int> result {getNearNeighbors(query[i], distance,
+        for (int i {0}; i < query.size(); ++i) {
+                vector<int> result {getNearNeighbors(query[i], param_r,
                                                      data)};  // result is a vector of index for points in data
 
                 // TODO should disable output for measuring query performance
@@ -171,6 +177,27 @@ int main(int argc, char* argv[]) {
         auto query_end = high_resolution_clock::now();
         auto query_duration = duration_cast<milliseconds>(query_end - query_start);
         cerr << "Querying completed in " << query_duration.count() << "ms" << endl;
+}
+
+int main(int argc, char* argv[]) {
+        if (argc != 4 && argc != 5) {
+                cerr << "Usage: " << argv[0] << " R DataFile QueryFile [SuccessProb]\n"
+                     << "       R               retrieve all points within hamming distance R\n"
+                     << "       DataFile        file containing all data points of the same dimension\n"
+                     << "                       each point represented as a binary string in a line\n"
+                     << "       QueryFile       file containing all query points\n"
+                     << "       SuccessProb     (optional) success probability that a r-near neighbor is returned\n";
+                return EXIT_FAILURE;
+        }
+
+        const int param_r {stoi(argv[1])};
+        const string data_file {argv[2]};
+        const string query_file {argv[3]};
+        double param_delta {1 - 0.9};           // default success probability 0.9
+        if (argc == 5)
+                param_delta = 1-stod(argv[4]);
+
+        NearNeighborSearch(data_file, query_file, param_r, param_delta);
 
         return EXIT_SUCCESS;
 }

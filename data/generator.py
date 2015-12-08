@@ -22,11 +22,9 @@ def to_binary(n, d):
     return [0]*(d-len(binlist)) + binlist
 
 def generate_data_sets(d, nd, df, nq, qf):
-    numbers = range(2**d)
-    random.shuffle(numbers)
-    points = [to_binary(num, d) for num in numbers[:(nd + nq)]]
+    points = [to_binary(random.randint(0, 2**d-1), d) for i in range(nd + nq)]
 
-    point_reducer = lambda x, y: str(x) + "" + str(y)
+    point_reducer = lambda x, y: str(x) + str(y)
     with open(df, "wb") as f:
         for i in range(nd):
             f.write(reduce(point_reducer, points[i]) + "\r\n")

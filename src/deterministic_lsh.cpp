@@ -28,16 +28,16 @@ void buildNearNeighborStruct(const int param_c,
                              const int param_n,
                              const vector<Point>& data) {
         // compute LSH parameters
-        assert(param_r + 1 < 20);                       // TODO larger r
+        assert(param_r + 1 < 30);                       // TODO larger r
         const int param_L = (1 << (param_r + 1)) - 1;   // use L = 2^(r+1)-1 hash functions
 
         // initialize hamming projection family
         projection.resize(param_L);
-        auto dice = bind(uniform_int_distribution<int>(0, param_L), default_random_engine());
+        auto dice = bind(uniform_int_distribution<int>(1, param_L), default_random_engine());
         for (int i {1}; i <= param_d; ++i) {
                 // m(i) randomly chosen from {0,1}^(r+1)
                 int m = dice();
-                // from all v in {0,1}^(r+1)\{0}
+                // use all v in {0,1}^(r+1)\{0}
                 for (int v = 1; v <= param_L; ++v) {
                         int p = (m & v);        // bitwise conjunction
                         bool w = false;         // compute parity

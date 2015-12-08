@@ -41,7 +41,7 @@ Final project due Dec 10
 Todo List
 ----------
 1. ~~vector\<bool> for linear scan~~
-2. deterministic LSH
+2. ~~deterministic LSH~~
 3. ~~success prob for randomized LSH~~
 4. measure time for all algorithms
 5. measure recall

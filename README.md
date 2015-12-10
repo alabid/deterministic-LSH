@@ -36,7 +36,7 @@ Rough Plan
 * [Remember to update evaluation section in final project report.]
 
 ### Stage 3: Final Report
-Final project due Dec 10
+Final project due Dec 14
 
 Todo List
 ----------

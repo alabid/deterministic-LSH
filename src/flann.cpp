@@ -20,17 +20,13 @@ void load_from_file(Matrix<float>& dataset, const string& filename) {
   }
 
   string line;
-  //int pointNum = 0;
 
-  while (getline(dfile, line)) {
-    stringstream ss(line);
-    int i = 0;
-    int j = 0;
-    char c;
-    while(ss >> c) {
-      dataset[i][j++] = c-'0';
-      i++;
+  int i = 0;
+  while (dfile >> line) {
+    for (unsigned j = 0; i < line.length(); i++) {
+      dataset[i][j] = line[j]-'0';
     }
+    i++;
   }
 
   dfile.close();

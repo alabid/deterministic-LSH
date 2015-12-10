@@ -74,7 +74,7 @@ void buildNearNeighborStruct(const int param_c,
                 p_start.push_back(die());
         }
         projection.resize(param_b * param_L);
-        auto dice = bind(uniform_int_distribution<int>(1, param_L), generator);
+        auto dice = bind(uniform_int_distribution<int>(0, param_L), generator);
         // for each i, check if a(v,k)_i = 1, if yes, then add (i-1) to projection[(k-1)*L + (v-1)]
         for (int i {1}; i <= param_d; ++i) {
                 for (int k {1}; k <= param_b; ++k) {
@@ -83,7 +83,7 @@ void buildNearNeighborStruct(const int param_c,
                         if (!((p_start[i - 1] <= k && k < p_start[i - 1] + param_q) ||
                               (p_start[i - 1] > k && k + param_b < p_start[i - 1] + param_q)))
                                 continue;
-                        // use all v in {0,1}^(r+1)\{0}
+                        // use all v in {0,1}^(tr'+1)\{0}
                         for (int v = 1; v <= param_L; ++v) {
                                 bool result_one = false;
                                 for (int j {0}; j < param_t; ++j) {

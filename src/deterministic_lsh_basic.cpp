@@ -34,7 +34,7 @@ void buildNearNeighborStruct(const int param_c,
 
         // initialize hamming projection family
         projection.resize(param_L);
-        auto dice = bind(uniform_int_distribution<int>(1, param_L), default_random_engine());
+        auto dice = bind(uniform_int_distribution<int>(0, param_L), default_random_engine());
         for (int i {1}; i <= param_d; ++i) {
                 // m(i) randomly chosen from {0,1}^(r+1)
                 int m = dice();

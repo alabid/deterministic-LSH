@@ -1,4 +1,5 @@
 CXX_OBJS_DETERM_LSH = bin/deterministic_lsh.o
+CXX_OBJS_DETERM_LSH_BAISC = bin/deterministic_lsh_basic.o
 CXX_OBJS_RANDOM_LSH = bin/randomized_lsh.o
 CXX_OBJS_LIN = bin/linear_scan.o
 CXX_OBJS_FLANN = bin/flann.o
@@ -24,8 +25,9 @@ FLANN_LSH := flann_lsh_main
 LINEAR_SCAN := linear_scan_main
 RANDOMIZED_LSH := randomized_lsh_main
 DETERMINISTIC_LSH := deterministic_lsh_main
+DETERMINISTIC_LSH_BASIC := deterministic_lsh_basic_main
 
-all : $(FLANN_LSH) $(LINEAR_SCAN) $(RANDOMIZED_LSH) $(DETERMINISTIC_LSH)
+all : $(FLANN_LSH) $(LINEAR_SCAN) $(RANDOMIZED_LSH) $(DETERMINISTIC_LSH) $(DETERMINISTIC_LSH_BASIC)
 
 $(FLANN_LSH) : $(CXX_OBJS_FLANN)
 	$(CXX) -o $@ $(CXX_OBJS_FLANN) $(LDFLAGS)
@@ -38,6 +40,9 @@ $(RANDOMIZED_LSH) : $(CXX_OBJS_RANDOM_LSH)
 
 $(DETERMINISTIC_LSH) : $(CXX_OBJS_DETERM_LSH)
 	$(CXX) -o $@ $(CXX_OBJS_DETERM_LSH)
+
+$(DETERMINISTIC_LSH_BASIC) : $(CXX_OBJS_DETERM_LSH_BAISC)
+	$(CXX) -o $@ $(CXX_OBJS_DETERM_LSH_BAISC)
 
 bin/%.o : src/%.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $<

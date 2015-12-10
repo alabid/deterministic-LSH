@@ -26,88 +26,34 @@ void buildNearNeighborStruct(const int param_c,
                              const int param_r,
                              const int param_d,
                              const int param_n,
-                             const int param_family,
                              const vector<Point>& data) {
         // compute LSH parameters
         assert(param_r + 1 < 30);                       // TODO larger r requires too much memory
-        int param_b, param_q, param_t;
-        int family = param_family;
-        if (family != 1 && family != 2) {
-                if (static_cast<double>(param_c) * param_r < log(static_cast<double>(param_n)) / log(2.0))
-                        family = 1;
-                else
-                        family = 2;
-        }
-        switch (family) {
-                case 1: {
-                        param_b = 1;
-                        param_q = 1;
-                        param_t = static_cast<int>(ceil(log2(static_cast<double>(param_n)) / param_c / param_r));
-                        break;
-                }
-                case 2: {
-                        param_b = param_r;
-                        param_q = 2 * static_cast<int>(ceil(log(static_cast<double>(param_n)) / param_c));
-                        param_t = 1;
-                        break;
-                }
-                default: {
-                        assert(false);  // only two available parameter settings for projection family
-                }
-        }
-        const int param_R = static_cast<int>(floor(param_r * param_q / param_b));       // parameter r'
-        const int param_L = (1 << (param_t * param_R + 1)) - 1;         // use L = 2^(tr'+1)-1 hash functions for every partition
-                                                                        // b*L hash functions in total
-        cerr << "family = " << family << endl
-             << "b = " << param_b << endl
-             << "q = " << param_q << endl
-             << "t = " << param_t << endl
-             << "r' = " << param_R << endl
-             << "L = " << param_L << endl
-             << "#functions = " << param_b * param_L << endl;
+        const int param_L = (1 << (param_r + 1)) - 1;   // use L = 2^(r+1)-1 hash functions
+                                                        // assuming cr=log(n), param_c is not used in basic algorithm
 
         // initialize hamming projection family
-        default_random_engine generator;
-        vector<int> p_start;            // random intervals function
-        auto die = bind(uniform_int_distribution<int>(1, param_b), generator);
+        projection.resize(param_L);
+        auto dice = bind(uniform_int_distribution<int>(1, param_L), default_random_engine());
         for (int i {1}; i <= param_d; ++i) {
-                p_start.push_back(die());
-        }
-        projection.resize(param_b * param_L);
-        auto dice = bind(uniform_int_distribution<int>(1, param_L), generator);
-        // for each i, check if a(v,k)_i = 1, if yes, then add (i-1) to projection[(k-1)*L + (v-1)]
-        for (int i {1}; i <= param_d; ++i) {
-                for (int k {1}; k <= param_b; ++k) {
-                        // compute p^-1(k)_i, if 0, then check next k
-                        // essentially check whether k is in the wrap-around q-length interval starting from p_start[i-1]
-                        if (!((p_start[i - 1] <= k && k < p_start[i - 1] + param_q) ||
-                              (p_start[i - 1] > k && k + param_b < p_start[i - 1] + param_q)))
-                                continue;
-                        // use all v in {0,1}^(r+1)\{0}
-                        for (int v = 1; v <= param_L; ++v) {
-                                bool result_one = false;
-                                for (int j {0}; j < param_t; ++j) {
-                                        int m = dice();
-                                        int p = (m & v);        // bitwise conjunction
-                                        bool w = false;         // compute parity
-                                        while (p) {
-                                                p &= (p - 1);
-                                                w = !w;
-                                        }
-                                        if (w) {                // shortcut for disjunction
-                                                result_one =  true;
-                                                break;
-                                        }
-                                }
-                                if (result_one) {
-                                        projection[(k - 1) * param_L + (v - 1)].push_back(i - 1);
-                                }
+                // m(i) randomly chosen from {0,1}^(r+1)
+                int m = dice();
+                // use all v in {0,1}^(r+1)\{0}
+                for (int v {1}; v <= param_L; ++v) {
+                        int p = (m & v);        // bitwise conjunction
+                        bool w = false;         // compute parity
+                        while (p) {
+                                p &= (p - 1);
+                                w = !w;
+                        }
+                        if (w) {
+                                projection[v - 1].push_back(i - 1);
                         }
                 }
         }
 
         // add data points (indices) to hash tables
-        hash_table.resize(param_b * param_L);
+        hash_table.resize(param_L);
         for (int i {0}; i < param_n; ++i) {
                 for (int j {0}; j < param_L; ++j) {
                         int64_t bucket {0};
@@ -188,8 +134,7 @@ vector<Point> readPointsFromFile(const string& file) {
 void NearNeighborSearch(const string& data_file,
                         const string& query_file,
                         const int param_r,                              // r-near
-                        const int param_c,                              // c-approximate
-                        const int param_family) {                       // hamming projection family
+                        const int param_c) {                            // c-approximate
         const vector<Point> data {readPointsFromFile(data_file)};       // data points
         const vector<Point> query {readPointsFromFile(query_file)};     // query points
         const int param_n {static_cast<int>(data.size())};              // number of data points
@@ -207,7 +152,7 @@ void NearNeighborSearch(const string& data_file,
         // build LSH construction and add data points
         using namespace std::chrono;
         auto build_start = high_resolution_clock::now();
-        buildNearNeighborStruct(param_c, param_r, param_d, param_n, param_family,
+        buildNearNeighborStruct(param_c, param_r, param_d, param_n,
                                 data);
         auto build_end = high_resolution_clock::now();
         auto build_duration = duration_cast<milliseconds>(build_end - build_start);
@@ -231,15 +176,13 @@ void NearNeighborSearch(const string& data_file,
 }
 
 int main(int argc, char* argv[]) {
-        if (argc != 5 && argc != 6) {
-                cerr << "Usage: " << argv[0] << " R C DataFile QueryFile [Family]\n"
+        if (argc != 5) {
+                cerr << "Usage: " << argv[0] << " R C DataFile QueryFile\n"
                      << "       R               retrieve all points within hamming distance R\n"
                      << "       C               approximation factor\n"
                      << "       DataFile        file containing all data points of the same dimension\n"
                      << "                       each point represented as a binary string in a line\n"
-                     << "       QueryFile       file containing all query points\n"
-                     << "       Family          choose hamming projection family H_A1 or H_A2\n"
-                     << "                       by default, if cr<log(n) use H_A1; otherwise, use H_A2";
+                     << "       QueryFile       file containing all query points\n";
                 return EXIT_FAILURE;
         }
 
@@ -247,11 +190,8 @@ int main(int argc, char* argv[]) {
         const int param_c {stoi(argv[2])};
         const string data_file {argv[3]};
         const string query_file {argv[4]};
-        int param_family {0};   // automatically choose projection family based on cr<>log(n)
-        if (argc == 6)
-                param_family = stoi(argv[5]);
 
-        NearNeighborSearch(data_file, query_file, param_r, param_c, param_family);
+        NearNeighborSearch(data_file, query_file, param_r, param_c);
 
         return EXIT_SUCCESS;
 }

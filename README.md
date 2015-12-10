@@ -44,7 +44,7 @@ Todo List
 2. ~~deterministic LSH~~
 3. ~~success prob for randomized LSH~~
 4. measure time for all algorithms
-5. measure recall
+5. ~~measure recall~~
 6. experiment for success probability
 7. impact of varing parameters c, k in randomized LSH
 8. presentation slides

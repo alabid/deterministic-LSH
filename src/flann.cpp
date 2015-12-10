@@ -33,12 +33,12 @@ void load_from_file(Matrix<float>& dataset, const string& filename) {
 }
 
 int main(int argc, char** argv) {
-    Matrix<float> dataset;
-    Matrix<float> query;
+    int d = 10;
+    Matrix<float> dataset(new float[16*d], 16, d);
+    Matrix<float> query(new float[4*d], 4, d);
     load_from_file(dataset, "data/files/d10nd16");
     load_from_file(query, "data/files/d10nq4");
 
-    int d = 10;
     Matrix<int> indices(new int[query.rows*d], query.rows, d);
     Matrix<float> dists(new float[query.rows*d], query.rows, d);
 

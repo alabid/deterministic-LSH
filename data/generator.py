@@ -18,8 +18,8 @@ import sys
 
 def to_binary(n, d):
     # bin(n) -> '0bxxx...'
-    binlist = [int(ch) for ch in list(bin(n))[2:]]
-    return [0]*(d-len(binlist)) + binlist
+    bin_string = bin(n)[2:]
+    return '0'*(d-len(bin_string)) + bin_string
 
 def generate_data_sets(d, nd, df, nq, qf):
     points = [to_binary(random.randint(0, 2**d-1), d) for i in range(nd + nq)]

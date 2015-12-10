@@ -239,7 +239,7 @@ int main(int argc, char* argv[]) {
                      << "                       each point represented as a binary string in a line\n"
                      << "       QueryFile       file containing all query points\n"
                      << "       Family          choose hamming projection family H_A1 or H_A2\n"
-                     << "                       by default, if cr<log(n) use H_A1; otherwise, use H_A2";
+                     << "                       by default, if cr<log(n) use H_A1; otherwise, use H_A2\n";
                 return EXIT_FAILURE;
         }
 

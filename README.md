@@ -36,16 +36,16 @@ Rough Plan
 * [Remember to update evaluation section in final project report.]
 
 ### Stage 3: Final Report
-Final project due Dec 14
+Final project due Dec 14 (submitted)
 
 Todo List
 ----------
 1. ~~vector\<bool> for linear scan~~
 2. ~~deterministic LSH~~
 3. ~~success prob for randomized LSH~~
-4. measure time for all algorithms
+4. ~~measure time for all algorithms~~
 5. ~~measure recall~~
-6. experiment for success probability
+6. ~~experiment for success probability~~
 7. impact of varing parameters c, k in randomized LSH
-8. presentation slides
-9. report
+8. ~~presentation slides~~
+9. ~~report~~

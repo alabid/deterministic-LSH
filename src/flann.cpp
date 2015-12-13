@@ -23,7 +23,7 @@ void load_from_file(Matrix<float>& dataset, const string& filename) {
 
   int i = 0;
   while (dfile >> line) {
-    for (unsigned j = 0; i < line.length(); i++) {
+    for (unsigned j = 0; j < line.length(); j++) {
       dataset[i][j] = line[j]-'0';
     }
     i++;

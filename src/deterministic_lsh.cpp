@@ -33,10 +33,10 @@ void buildNearNeighborStruct(const int param_c,
         int param_b, param_q, param_t;
         int family = param_family;
         if (family != 1 && family != 2) {
-                if (static_cast<double>(param_c) * param_r < log(static_cast<double>(param_n)) / log(2.0))
-                        family = 1;
+                        if (param_r > static_cast<int>(ceil(static_cast<double>(param_n)) / param_c))
+                                family = 2;
                 else
-                        family = 2;
+                        family = 1;
         }
         switch (family) {
                 case 1: {
@@ -109,7 +109,7 @@ void buildNearNeighborStruct(const int param_c,
         // add data points (indices) to hash tables
         hash_table.resize(param_b * param_L);
         for (int i {0}; i < param_n; ++i) {
-                for (int j {0}; j < param_L; ++j) {
+                for (int j {0}, sz{static_cast<int>(hash_table.size())}; j < sz; ++j) {
                         int64_t bucket {0};
                         for (const auto& k : projection[j]) {
                                 bucket = bucket * 2 + data[i][k];       // TODO bucket may overflow
